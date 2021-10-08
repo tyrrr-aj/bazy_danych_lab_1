@@ -1,22 +1,51 @@
+#include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
+#include <string.h>
 
 
 const int n_experiments = 10;
+const int n_records = 1000000;
 
 
-void prepare_records_native() {
+// native
 
+struct Rec {
+	int id;
+	char name[20];
+	char desc[90];
+};
+
+struct Rec* prepare_records_native() {
+	struct Rec* records = malloc(sizeof(struct Rec) * n_records);
+	
+	for (int i = 0; i < 1000000; i++) {
+		records[i].id = i;
+		strcpy(records[i].name, "Zora Cock");
+		strcpy(records[i].desc, "Lead singer of band Blackbriar, an exceptional musician!");
+	}
+	
+	return records;
 }
 
 void search_record_native() {
 
 }
 
+void cleanup_native(struct Rec* records) {
+	free(records);
+}
 
+
+// SQLite
+
+
+
+
+// measurements
 
 float get_time_score(clock_t c1, clock_t c2) {
 	return ((float) c2 - (float) c1) / CLOCKS_PER_SEC;
@@ -40,6 +69,7 @@ void report_memory_usage() {
 }
 
 
+
 int main() {	
 	float time_res_prepare[n_experiments];
 	float time_res_search[n_experiments];
@@ -47,10 +77,12 @@ int main() {
 	
 	for (int i = 0; i < n_experiments; i++) {
 		c1 = clock();
-		// prepare_records_native();
+		struct Rec* records = prepare_records_native();
 		printf("dziala\n");
 		c2 = clock();
 		time_res_prepare[i] = get_time_score(c1, c2);
+		
+		cleanup_native(records);
 	}
 	
 	report_time_score("prepare", time_res_prepare);
