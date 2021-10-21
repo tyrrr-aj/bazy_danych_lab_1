@@ -1,0 +1,7 @@
+*.db
+*.db-journal
+
+*.tmp
+
+*.docx
+*.pdf
