@@ -1,0 +1,80 @@
+Native:
+Avg time (prepare): 0.069249
+Avg time (search): 0.008243
+Max mem usage[kB]: 115492
+
+SQLite - memory:
+Avg time (prepare): 2.846087
+Avg time (search): 0.000029
+Max mem usage[kB]: 84540
+
+SQLite - disk:
+N/A - wstawienie 1000 rekordów trwa średnio 17 sekund
+
+SQLite - transakcje
+Avg time (prepare): 0.953716
+Avg time (search): 0.000030
+Max mem usage[kB]: 84620
+
+SQLite - disk + transakcje:
+Avg time (prepare): 1.246229
+Avg time (search): 0.000081
+Max mem usage[kB]: 5456
+
+SQLite - indeks:
+Avg time (prepare): 4.986257
+Avg time (search): 0.000029
+Max mem usage[kB]: 114544
+
+
+journaling_mode:
+
+SQLite - WAL (memory):
+Avg time (prepare): 2.923153
+Avg time (search): 0.000028
+Max mem usage[kB]: 84664
+
+SQLite - MEMORY (memory):
+Avg time (prepare): 2.890600
+Avg time (search): 0.000029
+Max mem usage[kB]: 84696
+
+SQLite - OFF (memory):
+Avg time (prepare): 1.194332
+Avg time (search): 0.000031
+Max mem usage[kB]: 84600
+
+SQLite - TRUNCATE (memory):
+Avg time (prepare): 2.924238
+Avg time (search): 0.000028
+Max mem usage[kB]: 84608
+
+SQLite - PERSIST (memory):
+Avg time (prepare): 2.893885
+Avg time (search): 0.000029
+Max mem usage[kB]: 84648
+
+SQLite - WAL (memory + transakcje):
+Avg time (prepare): 0.962553
+Avg time (search): 0.000033
+Max mem usage[kB]: 84584
+
+SQLite - MEMORY (memory + transakcje):
+Avg time (prepare): 1.005968
+Avg time (search): 0.000031
+Max mem usage[kB]: 84544
+
+SQLite - WAL (disk + transakcje):
+Avg time (prepare): 1.446675
+Avg time (search): 0.000042
+Max mem usage[kB]: 5764
+
+SQLite - MEMORY (disk + transakcje):
+Avg time (prepare): 1.257328
+Avg time (search): 0.000072
+Max mem usage[kB]: 5492
+
+SQLite - OFF (disk + transakcje):
+Avg time (prepare): 1.237724
+Avg time (search): 0.000072
+Max mem usage[kB]: 5472

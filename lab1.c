@@ -69,9 +69,18 @@ void measure_native(float* time_res_prepare, float* time_res_search) {
 const char* filename = "data.db";
 // const char* filename = ":memory:";
 
+void remove_db_files() {
+	if (remove(filename) != 0) {
+		fprintf(stderr, "Deleting sqlite file failed\n");
+		exit(1);
+	}
+}
+
 sqlite3* open_sqlite() {
 	int rc;
 	sqlite3* db;
+
+	remove_db_files();
 	
 	rc = sqlite3_open(filename, &db);
 	if (rc) {
@@ -80,6 +89,22 @@ sqlite3* open_sqlite() {
 	}
 
 	return db;
+}
+
+void set_journaling_mode(sqlite3* db) {
+	const char* sql = "PRAGMA journal_mode = WAL;";
+	// const char* sql = "PRAGMA journal_mode = MEMORY";
+	// const char* sql = "PRAGMA journal_mode = OFF";
+	// const char* sql = "PRAGMA journal_mode = TRUNCATE";
+	// const char* sql = "PRAGMA journal_mode = PERSIST";
+	// const char* sql = "PRAGMA journal_mode = DELETE";
+
+	int rc = sqlite3_exec(db, sql, NULL, NULL, NULL);
+	
+	if (rc) {
+		fprintf(stderr, "Database set journaling mode error: %s\n", sqlite3_errmsg(db));
+		exit(1);
+	}
 }
 
 void create_table(sqlite3* db) {
@@ -93,9 +118,38 @@ void create_table(sqlite3* db) {
 	}
 }
 
+void create_index(sqlite3* db) {
+	int rc = sqlite3_exec(db,
+		"CREATE INDEX IdxName ON People(name);",
+		NULL, NULL, NULL);
+	
+	if (rc) {
+		fprintf(stderr, "Database create index error: %s\n", sqlite3_errmsg(db));
+		exit(1);
+	}
+}
+
+void begin_transaction(sqlite3* db) {
+	int rc = sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, NULL);
+	if (rc) {
+		fprintf(stderr, "Database BEGIN TRANSACTION failed: %s\n", sqlite3_errmsg(db));
+		exit(1);
+	}
+}
+
+void commit_transaction(sqlite3* db) {
+	int rc = sqlite3_exec(db, "COMMIT", NULL, NULL, NULL);
+	if (rc) {
+		fprintf(stderr, "Database COMMIT failed: %s\n", sqlite3_errmsg(db));
+		exit(1);
+	}
+}
+
 void insert_records(sqlite3* db) {
 	int rc;
 	sqlite3_stmt* stmt;
+
+	begin_transaction(db);
 
 	char* sql = "INSERT INTO People(name, desc) VALUES (?1, ?2)";
 	rc = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
@@ -118,11 +172,15 @@ void insert_records(sqlite3* db) {
 	}
 
 	sqlite3_finalize(stmt);
+
+	commit_transaction(db);
 }
 
 void search_record_sqlite(sqlite3* db) {
 	int rc;
 	sqlite3_stmt* stmt;
+
+	begin_transaction(db);
 
 	char* sql = "SELECT * FROM People WHERE id = ?1";
 	rc = sqlite3_prepare_v2(db, sql, strlen(sql), &stmt, NULL);
@@ -140,24 +198,23 @@ void search_record_sqlite(sqlite3* db) {
 	}
 
 	sqlite3_finalize(stmt);
+
+	commit_transaction(db);
 }
 
 void close_sqlite(sqlite3* db) {
 	sqlite3_close(db);
-
-	if (remove(filename) != 0) {
-		fprintf(stderr, "Deleting sqlite file failed\n");
-		exit(1);
-	}
 }
 
 void measure_sqlite(float* time_res_prepare, float* time_res_search) {
 	clock_t c1, c2;
 
 	sqlite3* db = open_sqlite();
+	set_journaling_mode(db);
 
 	c1 = clock();
 	create_table(db);
+	// create_index(db);
 	insert_records(db);
 	c2 = clock();
 	*time_res_prepare = get_time_score(c1, c2);
